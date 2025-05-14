@@ -1,0 +1,77 @@
+import time
+import tkinter as tk
+
+class StopwatchClock:
+    def __init__(self, master):
+        self.master = master
+        master.title("Stopwatch & Clock")
+
+        self.elapsed_time = 0
+        self.running = False
+        self.start_time = 0
+
+        self.time_var = tk.StringVar()
+        self.time_var.set(self.format_time(0))
+
+        self.current_time_var = tk.StringVar()
+        self.update_current_time()
+
+        self.time_label = tk.Label(master, textvariable=self.time_var, font=("Arial", 48))
+        self.time_label.pack(pady=10)
+
+        self.current_time_label = tk.Label(master, textvariable=self.current_time_var, font=("Arial", 24))
+        self.current_time_label.pack()
+
+        self.start_button = tk.Button(master, text="Start", command=self.start_stopwatch, font=("Arial", 16))
+        self.start_button.pack(side=tk.LEFT, padx=5, pady=10)
+
+        self.stop_button = tk.Button(master, text="Stop", command=self.stop_stopwatch, font=("Arial", 16), state=tk.DISABLED)
+        self.stop_button.pack(side=tk.LEFT, padx=5, pady=10)
+
+        self.reset_button = tk.Button(master, text="Reset", command=self.reset_stopwatch, font=("Arial", 16))
+        self.reset_button.pack(side=tk.LEFT, padx=5, pady=10)
+
+        self.update_stopwatch()
+
+    def format_time(self, seconds):
+        hours = int(seconds // 3600)
+        minutes = int((seconds % 3600) // 60)
+        secs = int(seconds % 60)
+        return f"{hours:02d}:{minutes:02d}:{secs:02d}"
+
+    def start_stopwatch(self):
+        if not self.running:
+            self.running = True
+            self.start_time = time.time() - self.elapsed_time
+            self.start_button.config(state=tk.DISABLED)
+            self.stop_button.config(state=tk.NORMAL)
+
+    def stop_stopwatch(self):
+        if self.running:
+            self.running = False
+            self.elapsed_time = time.time() - self.start_time
+            self.start_button.config(state=tk.NORMAL)
+            self.stop_button.config(state=tk.DISABLED)
+
+    def reset_stopwatch(self):
+        self.running = False
+        self.elapsed_time = 0
+        self.time_var.set(self.format_time(0))
+        self.start_button.config(state=tk.NORMAL)
+        self.stop_button.config(state=tk.DISABLED)
+
+    def update_stopwatch(self):
+        if self.running:
+            self.elapsed_time = time.time() - self.start_time
+            self.time_var.set(self.format_time(self.elapsed_time))
+        self.master.after(100, self.update_stopwatch)  # Update every 100 milliseconds
+
+    def update_current_time(self):
+        now = time.strftime("%H:%M:%S")
+        self.current_time_var.set(f"Current Time: {now}")
+        self.master.after(1000, self.update_current_time) # Update every 1 second
+
+if __name__ == "__main__":
+    root = tk.Tk()
+    app = StopwatchClock(root)
+    root.mainloop()
